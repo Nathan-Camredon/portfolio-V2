@@ -19,6 +19,7 @@ flowchart LR
         UC6(Voir les offres et options)
         UC7(Demander un devis)
         UC8(Lire / laisser un avis)
+        UC9(Lire le blog)
     end
 
     subgraph Administration
@@ -29,11 +30,12 @@ flowchart LR
         UC14(Gérer offres et options)
         UC15(Traiter les devis)
         UC16(Modérer les avis)
+        UC17(Écrire et publier des articles)
     end
 
-    V --> UC1 & UC2 & UC3 & UC4 & UC5 & UC6 & UC7 & UC8
+    V --> UC1 & UC2 & UC3 & UC4 & UC5 & UC6 & UC7 & UC8 & UC9
     A --> UC10
-    UC10 -.-> UC11 & UC12 & UC13 & UC14 & UC15 & UC16
+    UC10 -.-> UC11 & UC12 & UC13 & UC14 & UC15 & UC16 & UC17
     UC7 -.-> S
 ```
 
@@ -241,6 +243,28 @@ erDiagram
         uuid option_id FK
     }
 
+    ARTICLE {
+        uuid id PK
+        string slug UK
+        string status "DRAFT | PUBLISHED"
+        string cover_path "nullable"
+        uuid project_id FK "nullable"
+        timestamp published_at "nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
+    ARTICLE_TRANSLATION {
+        uuid article_id FK
+        string locale "fr obligatoire, en facultatif"
+        string title
+        string summary
+        text content_markdown
+    }
+    ARTICLE_TAG {
+        uuid article_id FK
+        uuid tag_id FK
+    }
+
     REVIEW {
         uuid id PK
         string author_name
@@ -267,13 +291,17 @@ erDiagram
     OFFER_OPTION ||--o{ QUOTE_REQUEST_OPTION : sélectionnée
     PROJECT ||--o{ REVIEW : "reçoit (option)"
     OFFER ||--o{ REVIEW : "reçoit (option)"
+    ARTICLE ||--o{ ARTICLE_TRANSLATION : traduit
+    ARTICLE ||--o{ ARTICLE_TAG : a
+    TAG ||--o{ ARTICLE_TAG : classe
+    PROJECT |o--o{ ARTICLE : "est raconté par (option)"
 ```
 
 Notes de conception :
 - `PROFILE` est un **singleton** (une seule ligne) ; `PROFILE_TRANSLATION` a pour clé `(profile_id, locale)`.
 - Les prix sont en **centimes** (entiers) : jamais de `Float` pour l'argent.
 - `author_email` des avis n'est **jamais** renvoyé par l'API publique.
-- Index à prévoir : `project.slug`, `offer.slug`, `(project_id, tag_id)`, `review.status`, `quote_request.status`.
+- Index à prévoir : `project.slug`, `offer.slug`, `(project_id, tag_id)`, `review.status`, `quote_request.status`, `article.slug`, `(article.status, article.published_at)`, `(article_id, tag_id)`.
 
 ## 5. Diagramme de classes (exemple de couches — domaine « Projet »)
 
@@ -380,7 +408,7 @@ sequenceDiagram
     P-->>F: 200
 ```
 
-## 8. États — Devis et avis
+## 8. États — Devis, avis et articles
 
 ```mermaid
 stateDiagram-v2
@@ -402,6 +430,14 @@ stateDiagram-v2
     PENDING --> REJECTED: modération
     APPROVED --> REJECTED: retrait
     REJECTED --> [*]
+```
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> DRAFT: création
+    DRAFT --> PUBLISHED: publication
+    PUBLISHED --> DRAFT: dépublication
 ```
 
 ## 9. Déploiement

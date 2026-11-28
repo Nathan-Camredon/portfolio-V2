@@ -11,30 +11,32 @@
 | O2 | Montrer mes projets comme une « bibliothèque de jeux » | Fiches projets complètes, filtrables |
 | O3 | Vendre mes services freelance via un « shop » | Offres + options, demande de devis fonctionnelle |
 | O4 | **Apprendre à construire un vrai backend Kotlin** | API complète, testée, dockerisée, déployée |
+| O5 | Partager ce que j'apprends dans un **blog** (progression + visibilité) | Articles publiés depuis l'admin |
 
 ## 2. Périmètre
 
 ### Inclus (v1)
 - Site public bilingue **FR / EN**.
-- Page **Profil** : identité (avatar, pseudo, statut de disponibilité, bio, liens), **CV** (aperçu + téléchargement PDF), **parcours / timeline**.
+- Page **Profil** : identité (avatar, pseudo, statut de disponibilité, bio), **liens utiles**, **CV** (aperçu + téléchargement PDF), **parcours / timeline**.
 - Page **Bibliothèque** : liste de projets, fiche détaillée (captures + vidéo, tags/stack/statut, liens démo + GitHub, temps passé, date de sortie), filtres par tag/statut.
 - Page **Shop** : offres avec prix « à partir de » et **options (DLC)** ; formulaire de **demande de devis**.
-- **Livre d'or / avis** avec **modération** par l'admin.
-- **Panel admin** (un seul compte) : CRUD de tout le contenu, upload de médias et de CV, traitement des devis, modération des avis.
+- Page **Social** : **blog** (articles en Markdown, brouillons, tags, projet lié en option, FR obligatoire et EN facultatif) et **livre d'or / avis** avec **modération** par l'admin.
+- **Panel admin** (un seul compte) : CRUD de tout le contenu (articles compris), upload de médias, d'images d'articles et de CV, traitement des devis, modération des avis.
 - Notification **par email** à chaque devis, stockage en base.
 
 ### Exclu (v1)
 - Comptes visiteurs, wishlist, paiement en ligne, compteurs de vues, webhook Discord.
-- Tout le contenu éditorial « live » (blog, actualités).
+- Commentaires sous les articles (modération et spam).
 
-### Hypothèses à valider
-- Le **Profil** contient aussi les bases (avatar, pseudo, statut, bio, liens), même si non cochées explicitement : sans elles la page est vide.
-- Les **avis** forment un livre d'or global, avec un projet ou une offre rattachés en option.
+### Choix retenus
+- Le **Profil** contient les bases (avatar, pseudo, statut, bio) et la timeline, en complément du CV.
+- Les **avis** forment un livre d'or global affiché dans **Social**, avec un projet ou une offre rattachés en option.
+- Idéalement, chaque étape du backend donne lieu à un article.
 - Un seul compte admin (Nathan).
 
 ## 3. Acteurs
 
-- **Visiteur** : consulte, filtre, télécharge le CV, demande un devis, laisse un avis.
+- **Visiteur** : consulte, filtre, lit le blog, télécharge le CV, demande un devis, laisse un avis.
 - **Admin (Nathan)** : gère tout le contenu et traite les demandes.
 - **Système** : envoie les emails, applique la limitation de débit.
 
@@ -51,6 +53,7 @@
 | F6 | Lister les offres publiées avec leurs options |
 | F7 | Envoyer une demande de devis (offre optionnelle + options cochées) |
 | F8 | Lister les avis approuvés ; soumettre un avis (statut `PENDING`) |
+| F9 | Lister les articles publiés (paginé, filtre par tag) ; lire un article par `slug` |
 
 ### Admin
 | ID | Exigence |
@@ -62,6 +65,7 @@
 | A5 | CRUD offres et options |
 | A6 | Lister les devis, changer leur statut |
 | A7 | Modérer les avis (approuver / rejeter / supprimer) |
+| A8 | CRUD articles, brouillon / publication, upload d'images |
 
 ## 5. Exigences non fonctionnelles
 
@@ -71,19 +75,23 @@
 - **Fiabilité** : migrations versionnées, sauvegarde `pg_dump` quotidienne, endpoint `/health`.
 - **Qualité** : tests automatisés (unitaires + intégration), CI sur chaque PR, API documentée en OpenAPI.
 - **Maintenabilité** : architecture en couches, DTO séparés des entités, injection de dépendances.
-- **i18n** : tout contenu éditorial existe en FR et EN ; le front choisit via `?lang=` ou en-tête `Accept-Language`.
+- **i18n** : le contenu éditorial existe en FR et EN, sauf les articles (EN facultatif, repli sur le FR) ; le front choisit via `?lang=` ou en-tête `Accept-Language`.
+- **Markdown** : le rendu des articles est assaini côté front (pas de HTML ou script injecté).
 - **Accessibilité / SEO** : gérés côté front (SSG, balises meta, contrastes).
 
 ## 6. Pages du site (front)
 
+Navigation principale : **Boutique · Bibliothèque · Social · Profil**.
+
 | Route | Équivalent Steam | Contenu |
 |-------|------------------|---------|
-| `/` ou `/profile` | Page profil | Identité, statut, CV, timeline |
+| `/` ou `/profile` | Page profil | Identité, statut, liens utiles, CV, timeline |
 | `/library` | Bibliothèque | Liste + filtres |
 | `/library/[slug]` | Page du jeu | Fiche projet |
 | `/shop` | Boutique | Offres |
 | `/shop/[slug]` | Page produit | Détail + options (DLC) + devis |
-| `/reviews` | Communauté | Livre d'or |
+| `/social` | Communauté | Articles du blog + livre d'or |
+| `/social/[slug]` | Actualité | Lecture d'un article |
 | `/admin/**` | — | Panel admin (protégé) |
 | `/legal` | — | Mentions légales / confidentialité |
 
@@ -115,6 +123,7 @@
 | Risque | Impact | Parade |
 |--------|--------|--------|
 | Trop de périmètre pour apprendre | Abandon | Livrer par étapes, chaque étape utilisable |
+| Blog laissé à l'abandon | Page Social vide | Articles courts, un par étape, brouillons |
 | Spam sur devis/avis | Boîte mail polluée | Rate limit, honeypot, modération |
 | Perte de données | Contenu perdu | Sauvegardes + migrations |
 | Fuite de secrets | Compromission | Variables d'env, `.env` hors Git |

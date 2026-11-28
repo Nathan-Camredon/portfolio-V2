@@ -41,6 +41,8 @@ Auth admin : en-tête `Authorization: Bearer <jwt>`.
 | POST | `/quotes` | Demande de devis | 201 / 400 / 429 |
 | GET | `/reviews` | Avis approuvés (paginé) | 200 |
 | POST | `/reviews` | Soumettre un avis (`PENDING`) | 201 / 400 / 429 |
+| GET | `/articles` | Articles publiés, du plus récent au plus ancien. Filtres : `tag`, `page`, `size` | 200 paginé |
+| GET | `/articles/{slug}` | Article complet (Markdown) | 200 / 404 |
 
 ### Exemples
 
@@ -82,6 +84,23 @@ Auth admin : en-tête `Authorization: Bearer <jwt>`.
 
 Réponse : `201 { "id": "…", "status": "NEW" }`
 
+`GET /articles/ma-premiere-route-ktor?lang=en`
+
+```json
+{
+  "slug": "ma-premiere-route-ktor",
+  "locale": "fr",
+  "title": "Ma première route Ktor",
+  "summary": "Ce que j'ai appris en écrivant /health.",
+  "contentMarkdown": "## Le routing\n...",
+  "tags": ["kotlin", "ktor"],
+  "projectSlug": null,
+  "coverUrl": null,
+  "publishedAt": "2026-11-28T18:00:00Z"
+}
+```
+`locale` indique la langue réellement servie : ici la version anglaise n'existe pas, donc repli sur le français. Un brouillon répond `404` en public.
+
 ## Admin (JWT requis sauf login)
 
 | Méthode | Route | Description |
@@ -103,6 +122,9 @@ Réponse : `201 { "id": "…", "status": "NEW" }`
 | GET | `/admin/reviews` | Avis (filtre `status`) |
 | PATCH | `/admin/reviews/{id}` | Approuver / rejeter |
 | DELETE | `/admin/reviews/{id}` | Supprimer |
+| CRUD | `/admin/articles` | Articles (+ traductions, tags), brouillons inclus |
+| PATCH | `/admin/articles/{id}/status` | Publier / dépublier |
+| POST | `/admin/articles/images` | Upload d'une image à insérer dans le Markdown (multipart) |
 
 ## Règles transverses
 

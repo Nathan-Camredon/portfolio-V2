@@ -30,23 +30,26 @@ Git : une branche par étape (`feature/…`), Conventional Commits, PR vers `pre
 | 8 | `feature/admin-crud` | CRUD complet, transactions, conflits (409), slugs | CRUD projets/offres/tags/timeline/profil | Tout le contenu modifiable via l'API |
 | 9 | `feature/uploads` | Multipart, validation de fichiers, stockage disque, service de fichiers statiques | Upload images + CV, téléchargement | Mauvais type/taille refusés |
 
-## Phase D — Interactions visiteurs
+## Phase D — Blog et interactions visiteurs
 
 | Étape | Branche | Tu apprends | Livrable | Critère de fin |
 |-------|---------|-------------|----------|----------------|
-| 10 | `feature/quotes` | Validation d'entrée, rate limiting, honeypot, envoi SMTP asynchrone (coroutines) | `POST /quotes` + email + admin | Un devis crée une ligne **et** un mail |
-| 11 | `feature/reviews` | Machine à états, modération, ne pas exposer de données privées | Avis + modération | Un avis `PENDING` n'apparaît pas en public |
+| 10 | `feature/blog` | Réutiliser tes acquis en autonomie : migration, CRUD, brouillon/publication, repli de langue, pagination | Articles publics + admin | Un brouillon est invisible en public |
+| 11 | `feature/quotes` | Validation d'entrée, rate limiting, honeypot, envoi SMTP asynchrone (coroutines) | `POST /quotes` + email + admin | Un devis crée une ligne **et** un mail |
+| 12 | `feature/reviews` | Machine à états, modération, ne pas exposer de données privées | Avis + modération | Un avis `PENDING` n'apparaît pas en public |
 
 ## Phase E — Qualité et mise en production
 
 | Étape | Branche | Tu apprends | Livrable | Critère de fin |
 |-------|---------|-------------|----------|----------------|
-| 12 | `feature/openapi-docs` | OpenAPI, Swagger UI, CORS, en-têtes de cache | Doc interactive | Le front peut se brancher dessus |
-| 13 | `feature/ci` | GitHub Actions, cache Gradle, Testcontainers en CI | Pipeline build + tests | PR rouge si test cassé |
-| 14 | `feature/docker-deploy` | Dockerfile multi-étapes, compose prod, Caddy, variables d'env, sauvegardes | Stack déployable | `docker compose up` en local = prod |
-| 15 | `feature/go-live` | VPS, DNS, HTTPS, logs, monitoring de base | Site en ligne | Accessible sur ton domaine |
+| 13 | `feature/openapi-docs` | OpenAPI, Swagger UI, CORS, en-têtes de cache | Doc interactive | Le front peut se brancher dessus |
+| 14 | `feature/ci` | GitHub Actions, cache Gradle, Testcontainers en CI | Pipeline build + tests | PR rouge si test cassé |
+| 15 | `feature/docker-deploy` | Dockerfile multi-étapes, compose prod, Caddy, variables d'env, sauvegardes | Stack déployable | `docker compose up` en local = prod |
+| 16 | `feature/go-live` | VPS, DNS, HTTPS, logs, monitoring de base | Site en ligne | Accessible sur ton domaine |
 
 > **Les tests ne sont pas une étape à part** : à partir de l'étape 1, chaque étape ajoute ses tests (`testApplication` pour les routes, unitaires pour les services, Testcontainers pour les repos). Je te montrerai comment dès l'étape 1.
+
+> **Un article par étape** : dès que le blog est en ligne, raconte ce que tu as appris. Tu peux rédiger les brouillons en Markdown au fil de l'eau, dès l'étape 0.
 
 ## Côté front (Claude, en parallèle)
 
@@ -55,8 +58,8 @@ Git : une branche par étape (`feature/…`), Conventional Commits, PR vers `pre
 | Après étape 2 | Squelette Next.js + thème Steam, pages branchées sur des données mockées conformes à `03-api.md` |
 | Après étape 5 | Pages Profil, Bibliothèque, Shop branchées sur l'API réelle |
 | Après étape 8 | Panel admin |
-| Après étape 10-11 | Formulaires devis et avis |
-| Après étape 14 | SEO, performance, accessibilité, déploiement |
+| Après étapes 10-12 | Page Social (blog + livre d'or), formulaires devis et avis |
+| Après étape 15 | SEO, performance, accessibilité, déploiement |
 
 ## Hors périmètre v1 (idées pour plus tard)
 
